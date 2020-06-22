@@ -1,6 +1,7 @@
 import Web3 from 'web3'
-import Axios from 'axios' // 测试中未使用。
+import Axios from 'axios'
 import Withdrawer from './Withdrawer'
+import BigNumber from 'bignumber.js'
 
 const God = {
 	theEth: null,
@@ -8,6 +9,7 @@ const God = {
 	theWithdrawer: null,
 	theAccount: '0x0',
 	theNetwork: '',
+	theBalance: 0,
 	API: '/api/v1/oracle/signature',
 
 	/**
@@ -27,7 +29,13 @@ const God = {
 				this.theWeb3.eth.getAccounts().then(accounts => {
 					this.theAccount = accounts[0]
 
-					return callback()
+					this.theWeb3.eth.getBalance(this.theAccount).then(balance => {
+						if (balance) {
+							this.theBalance = this.theWeb3.utils.fromWei(balance, 'ether')
+							return callback()
+						}
+					})
+
 				})
 			})
 		}
@@ -35,13 +43,14 @@ const God = {
 
 	/**
 	 * 向初始合约发送指定ETH，测试时为写死的50000000000000000。
+	 * @param {Number} num 转帐数量
 	 * @param {Function} callback 成功后回调。
 	 */
-	sendEth: function (callback) {
+	sendEth: function (num, callback) {
 		this.theWeb3.eth.sendTransaction({
 			from: this.theAccount,
 			to: '0xf98D7594f3f68ed2d667bB89f5e4506193a02eC3',
-			value: '50000000000000000'
+			value: new BigNumber(this.theWeb3.utils.toWei(num, 'ether'))
 		}, (error, hash) => {
 			// if (error) {
 			// 	return console.error(error)

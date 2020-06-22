@@ -4,11 +4,24 @@ class MainView extends React.Component {
 	constructor(props) {
 		super(props)
 
+		this.state = {
+			value: 0
+		}
+
 		this.onClickSendEth = this.onClickSendEth.bind(this)
+		this.onChangeValue = this.onChangeValue.bind(this)
 	}
 
 	onClickSendEth() {
-		return this.props.sendEth()
+		if (this.state.value > 0) {
+			return this.props.sendEth(String(this.state.value))
+		}
+	}
+
+	onChangeValue(event) {
+		this.setState({
+			value: parseFloat(event.currentTarget.value)
+		})
 	}
 
 	render() {
@@ -24,11 +37,22 @@ class MainView extends React.Component {
 				<span>Current Wallet: </span>
 				<span>{this.props.wallet}</span>
 			</div>
+			<div>
+				<span>Balance: </span>
+				<span>{this.props.balance} ETH</span>
+			</div>
 
 			<div style={{
 				marginTop: '1rem',
 				marginBottom: '1rem'
 			}}>
+				<span>
+					<input
+						onChange={this.onChangeValue}
+						step="0.01"
+						type="number" />
+					ETH
+					</span>
 				<button onClick={this.onClickSendEth}>Send</button>
 			</div>
 

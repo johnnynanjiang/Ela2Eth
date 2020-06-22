@@ -100,7 +100,7 @@ const God = {
 	 * @param {Function} callback 成功后回调。
 	 */
 	withdraw: function (args, callback) {
-		const m = this.theWithdrawer.methods.withdraw(
+		this.theWithdrawer.methods.withdraw(
 			args.txid,
 			args.to,
 			args.amount,

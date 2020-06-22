@@ -6,10 +6,12 @@ function App() {
   const [me, setMe] = useState('')
   const [net, setNet] = useState('')
   const [message, setMessage] = useState('点击"Send"按钮发送token')
+  const [loaded, setLoaded] = useState(false)
 
   God.init(() => {
     setMe(God.theAccount)
     setNet(God.theNetwork)
+    setLoaded(true)
   })
 
   const sendEth = () => {
@@ -33,11 +35,11 @@ function App() {
     <div>
       <h1 style={{ marginLeft: '1rem' }}>Smart Contract Testing</h1>
 
-      <MainView
+      {loaded ? (<MainView
         net={net}
         wallet={me}
         sendEth={sendEth}
-        message={message} />
+        message={message} />) : null}
     </div>
   );
 }

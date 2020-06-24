@@ -8,13 +8,13 @@ class MainView extends React.Component {
 			value: 0
 		}
 
-		this.onClickSendEth = this.onClickSendEth.bind(this)
+		this.onClickSendELA = this.onClickSendELA.bind(this)
 		this.onChangeValue = this.onChangeValue.bind(this)
 	}
 
-	onClickSendEth() {
+	onClickSendELA() {
 		if (this.state.value > 0) {
-			return this.props.sendEth(String(this.state.value))
+			return this.props.sendELA(String(this.state.value))
 		}
 	}
 
@@ -33,27 +33,39 @@ class MainView extends React.Component {
 				<span>Current Network: </span>
 				<span>{this.props.net}</span>
 			</div>
+
 			<div>
 				<span>Current Wallet: </span>
 				<span>{this.props.wallet}</span>
 			</div>
+
 			<div>
-				<span>Balance: </span>
-				<span>{this.props.balance} ETH</span>
+				<span>ELA Balance: </span>
+				<span>{this.props.balanceELA}</span>
+			</div>
+
+			<div>
+				<span>ETH Balance: </span>
+				<span>{this.props.balance}</span>
 			</div>
 
 			<div style={{
 				marginTop: '1rem',
 				marginBottom: '1rem'
 			}}>
-				<span>
-					<input
-						onChange={this.onChangeValue}
-						step="0.01"
-						type="number" />
-					ETH
+				<div>Mapping ELA to ETH</div>
+
+				<div>
+					<span>
+						<input
+							onChange={this.onChangeValue}
+							step="0.01"
+							type="number" />
 					</span>
-				<button onClick={this.onClickSendEth}>Send</button>
+					<button
+						disabled={!(this.state.value > 0)}
+						onClick={this.onClickSendELA}>Send ELA</button>
+				</div>
 			</div>
 
 			<div style={{

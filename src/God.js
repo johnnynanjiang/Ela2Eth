@@ -1,16 +1,17 @@
 import Web3 from 'web3'
-import Axios from 'axios'
+import axios from 'axios'
 import Withdrawer from './Withdrawer'
 import BigNumber from 'bignumber.js'
+import ELA from "./ELA";
 
 const God = {
 	theEth: null,
 	theWeb3: null,
-	theWithdrawer: null,
-	theAccount: '0x0',
-	theNetwork: '',
-	theBalance: 0,
-	API: '/api/v1/oracle/signature',
+	_theAccount: '',
+	// API: 'http://localhost:8080/api/v1/oracle/signature',
+	API: '/go/api/v1/oracle/signature',
+	_contractInput: null,
+	_contractOutput: null,
 
 	/**
 	 * 因为是测试模拟流程，所以没有实现基于web3的新建帐户或导入已有帐户私钥等功能，暂时先基于Metamask浏览器插件运行。
@@ -21,24 +22,41 @@ const God = {
 		if (typeof window.ethereum !== 'undefined') {
 			this.theEth = window.ethereum
 			this.theEth.enable()
-
 			this.theWeb3 = new Web3(Web3.givenProvider)
-			this.theWeb3.eth.net.getNetworkType().then(network => {
-				this.theNetwork = network
-
-				this.theWeb3.eth.getAccounts().then(accounts => {
-					this.theAccount = accounts[0]
-
-					this.theWeb3.eth.getBalance(this.theAccount).then(balance => {
-						if (balance) {
-							this.theBalance = this.theWeb3.utils.fromWei(balance, 'ether')
-							return callback()
-						}
-					})
-
-				})
-			})
+			return callback()
 		}
+	},
+
+	getNetwork: function (callback) {
+		this.theWeb3.eth.net.getNetworkType().then(network => {
+			return callback(network)
+		})
+	},
+
+	getAccount: function (callback) {
+		this.theWeb3.eth.getAccounts().then(accounts => {
+			this._theAccount = accounts[0]
+			return callback(this._theAccount)
+		})
+	},
+
+	getBalanceOfELA: function (callback) {
+		this.getInputContract().methods.balanceOf(this._theAccount).call().then(balance => {
+			return callback(balance)
+		})
+	},
+
+	getBalanceOfETH: function (callback) {
+		this.theWeb3.eth.getBalance(this._theAccount).then(balance => {
+			return callback(this.theWeb3.utils.fromWei(balance, 'ether'))
+		})
+	},
+
+	getInputContract: function () {
+		if (!this._contractInput) {
+			this._contractInput = new this.theWeb3.eth.Contract(ELA.abi, ELA.address)
+		}
+		return this._contractInput
 	},
 
 	/**
@@ -46,20 +64,17 @@ const God = {
 	 * @param {Number} num 转帐数量
 	 * @param {Function} callback 成功后回调。
 	 */
-	sendEth: function (num, callback) {
+	sendELA: function (num, callback) {
 		this.theWeb3.eth.sendTransaction({
-			from: this.theAccount,
-			to: '0xf98D7594f3f68ed2d667bB89f5e4506193a02eC3',
+			from: this._theAccount,
+			to: ELA.address,
 			value: new BigNumber(this.theWeb3.utils.toWei(num, 'ether'))
 		}, (error, hash) => {
-			// if (error) {
-			// 	return console.error(error)
-			// } else {
-			// 	return callback(hash)
-			// }
-
-			// 测试时，即使中断支付也可以模拟到下一步。
-			return callback('模拟tx')
+			if (error) {
+				return console.error(error)
+			} else {
+				return callback(hash)
+			}
 		})
 	},
 
@@ -69,7 +84,21 @@ const God = {
 	 * @param {Function} callback 成功后回调
 	 */
 	requestAPI: function (tx, callback) {
-		// Axios.get(this.API + 'xid=' + tx + '&chain_type=ESC').then(function (response) {
+		const s = this.API + '?txid=' + tx + '&chain_type=ETH'
+		console.log(s)
+
+		axios({
+			method: 'get',
+			url: s
+		}).then(function (response) {
+			if (response.status === 200) {
+				return callback(response.result)
+			}
+		}).catch(function (error) {
+			console.error(error)
+		})
+
+		// axios.get(s).then(function (response) {
 		// 	if (response.status === 200) {
 		// 		return callback(response.result)
 		// 	}
@@ -78,29 +107,19 @@ const God = {
 		// }).then(function () { });
 
 		// 模拟请求接口后返回数据。
-		return callback({
-			"to": "0x5b4a755b609bca3cafb48ba893973ef6fa146554",
-			"amount": 10,
-			"nonce": 36,
-			"v": 28,
-			"r": "0x2a0b4d300510e5f7126c656b92de71f81a0a3ded5aa738a55e0c7b55be2b3d90",
-			"s": "0x095cd24bab00bcd157a6441a729c064b6881e0263301b1b06c7c67062968d111",
-			"txid": "0xbdd419ff6dab0d45d73bc786db0e9eda34a136d1c09ce47f6ab5af6261fea3e3",
-			"chain": "ETH",
-			"action": "esc_withdraw",
-			"token_address": "0x52e7cA56ac0391918FAAe11a91b8827cb5838Eb8",
-			"contract": "0x52e7cA56ac0391918FAAe11a91b8827cb5838Eb8"
-		})
+		// return callback({ "to": "0x17b9fdc6f4eb2e9f4fbbf8f2d356d8e3e6346e33", "amount": 100000000000000000, "nonce": 17, "v": 27, "r": "0x01a73faf0b498d84f6d4221bd405b95716c2e9bc43ab7931a43ee3498bc14fe0", "s": "0x59db4d8d4c869ffc4fb4c1e3aeb710112ff06eda83db7bb8c22e9bfd70172509", "txid": "0x156b48cdf1794ef3a60c22d88c3efe63a0d0101442a4c30614dd6379af3f01e4", "chain": "ESC", "action": "esc_mint_token", "token_address": "0x0000000000000000000000000000000000000000", "contract": "0xE32165D46197aaCc85Bf561c548259a485C085Dc" })
 	},
 
 	/**
 	 * 根据签名接口返回的合约地址生成提币合约对象。
-	 * @param {String} contractAddress 提币合约地址
 	 */
-	makeWithdrawer: function (contractAddress) {
-		if (!this.theWithdrawer) {
-			this.theWithdrawer = new this.theWeb3.eth.Contract(Withdrawer.abi, contractAddress)
+	getOutputContract: function () {
+		if (!this._contractOutput) {
+			this._contractOutput = new this.theWeb3.eth.Contract(Withdrawer.abi, Withdrawer.address)
 		}
+
+		console.log(this._contractOutput)
+		return this._contractOutput
 	},
 
 	/**
@@ -109,7 +128,13 @@ const God = {
 	 * @param {Function} callback 成功后回调。
 	 */
 	withdraw: function (args, callback) {
-		this.theWithdrawer.methods.withdraw(
+		console.log('提币操作。', args)
+
+		// this.getOutputContract().methods.mintToken(
+		// this.getOutputContract().methods.withdraw(
+		// this.getOutputContract().methods.withdrawEth(
+		this.getInputContract().methods.mint(
+			// args.token_address,
 			args.txid,
 			args.to,
 			args.amount,
@@ -117,8 +142,10 @@ const God = {
 			[args.v],
 			[args.r],
 			[args.s]
-		).call().then(function (res) {
-			return callback()
+		).send({
+			from: this._theAccount
+		}, function (err, res) {
+			console.log(err, res)
 		})
 	}
 }

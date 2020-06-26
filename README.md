@@ -18,7 +18,7 @@ You will also see any lint errors in the console.
 
 ### `npm run deploy` 
 
-Deploys the dist on `https://github.com/johnnynanjiang/Ela2Eth.git` . You can visit this page on `https://github.com/johnnynanjiang/Ela2Eth.git`.
+Deploys the dist on `https://github.com/johnnynanjiang/Ela2Eth.git` . You can visit this page on `https://johnnynanjiang.me/Ela2Eth/`.
 
 ### `yarn test` 
 

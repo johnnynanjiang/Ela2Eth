@@ -4,10 +4,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
-### `npm run deploy` 
-
-Deploys the dist on `https://github.com/johnnynanjiang/Ela2Eth.git` . You can visit this page on `https://github.com/johnnynanjiang/Ela2Eth.git` .
-
 ### `docker build -t=e2e_dapp` 
 
 If you have Docker environment, you can run 'docker build -t=e2e_dapp' to build a docker image. After progress is done, run 'docker run -p [port]:8080 e2e_dapp' to launch this project in a docker container.
@@ -19,6 +15,10 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
+
+### `npm run deploy` 
+
+Deploys the dist on `https://github.com/johnnynanjiang/Ela2Eth.git` . You can visit this page on `https://github.com/johnnynanjiang/Ela2Eth.git`.
 
 ### `yarn test` 
 

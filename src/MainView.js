@@ -8,13 +8,13 @@ class MainView extends React.Component {
 			value: 0
 		}
 
-		this.onClickSendELA = this.onClickSendELA.bind(this)
+		this.onClickTransferButton = this.onClickTransferButton.bind(this)
 		this.onChangeValue = this.onChangeValue.bind(this)
 	}
 
-	onClickSendELA() {
+	onClickTransferButton() {
 		if (this.state.value > 0) {
-			return this.props.sendELA(String(this.state.value))
+			return this.props.transfer(this.state.value)
 		}
 	}
 
@@ -39,10 +39,10 @@ class MainView extends React.Component {
 				<span>{this.props.wallet}</span>
 			</div>
 
-			<div>
-				<span>ELA Balance: </span>
+			{/* <div>
+				<span>WETH Balance: </span>
 				<span>{this.props.balanceELA}</span>
-			</div>
+			</div> */}
 
 			<div>
 				<span>ETH Balance: </span>
@@ -53,18 +53,19 @@ class MainView extends React.Component {
 				marginTop: '1rem',
 				marginBottom: '1rem'
 			}}>
-				<div>Mapping ELA to ETH</div>
+				<div>Transfer ETH to WETH</div>
 
 				<div>
 					<span>
 						<input
 							onChange={this.onChangeValue}
+							placeholder="ether"
 							step="0.01"
 							type="number" />
 					</span>
 					<button
 						disabled={!(this.state.value > 0)}
-						onClick={this.onClickSendELA}>Send ELA</button>
+						onClick={this.onClickTransferButton}>转换</button>
 				</div>
 			</div>
 

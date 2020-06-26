@@ -7,7 +7,7 @@ function App() {
   const [net, setNet] = useState('')
   const [balance, setBalance] = useState(0)
   const [balanceELA, setBalanceELA] = useState(0)
-  const [message, setMessage] = useState('点击"Send"按钮发送token')
+  const [message, setMessage] = useState('点击“转换”按钮发送token')
   const [loaded, setLoaded] = useState(false)
 
   God.init(() => {
@@ -22,18 +22,14 @@ function App() {
         setBalance(eth)
       })
 
-      God.getBalanceOfELA(ela => {
-        setBalanceELA(ela)
-      })
-
       setLoaded(true)
     })
   })
 
-  const sendELA = (num) => {
+  const transfer = (num) => {
     setMessage('正在向指定合约转帐，等待唤起Metamask……')
 
-    God.sendELA(num, tx => {
+    God.transfer(num, tx => {
       setMessage('转帐请求（' + tx + '）正在确认，请求签名接口……')
 
       God.requestAPI(tx, result => {
@@ -54,8 +50,8 @@ function App() {
         net={net}
         wallet={me}
         balance={balance}
-        balanceELA={balanceELA}
-        sendELA={sendELA}
+        // balanceELA={balanceELA}
+        transfer={transfer}
         message={message} />) : null}
     </div>
   );

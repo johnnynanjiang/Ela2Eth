@@ -1,4 +1,3 @@
-import Web3 from 'web3'
 import ESCExchange from './ESCExchange'
 import BigNumber from 'bignumber.js'
 import ETHExchange from "./ETHExchange";
@@ -7,30 +6,56 @@ const God = {
 	theEth: null,
 	theWeb3: null,
 	_theAccount: '',
-	API: '/api/v1/oracle/signature',
+	API: 'https://dev.elapp.org/api/v1/oracle/signature',
 	_contractInput: null,
 	_contractOutput: null,
 	_contractWETH: null,
+	_networkId: 0,
 
-	/**
-	 * 因为是测试模拟流程，所以没有实现基于web3的新建帐户或导入已有帐户私钥等功能，暂时先基于Metamask浏览器插件运行。
-	 * 初始化时连接Metamask后，使用Metamask封装的web3进行链的操作。
-	 * @param {Function} callback 成功后回调。
-	 */
-	init: function (callback) {
-		if (typeof window.ethereum !== 'undefined') {
-			this.theEth = window.ethereum
-			this.theEth.enable()
-			this.theWeb3 = new Web3(Web3.givenProvider)
-			// this.theWeb3 = new Web3('https://mainrpc.elaeth.io')
-			// this.theWeb3 = new Web3('https://rpc.elaeth.io')
-			return callback()
-		}
+	onChangeNetwork: function (func) {
+		func()
 	},
 
-	getNetwork: function (callback) {
+	// /**
+	//  * 因为是测试模拟流程，所以没有实现基于web3的新建帐户或导入已有帐户私钥等功能，暂时先基于Metamask浏览器插件运行。
+	//  * 初始化时连接Metamask后，使用Metamask封装的web3进行链的操作。
+	//  */
+	// init: function () {
+	// 	if (typeof window.ethereum !== 'undefined') {
+	// 		this.theEth = window.ethereum
+	// 		this.theEth.enable()
+	// 		this.theWeb3 = new Web3(Web3.givenProvider)
+
+	// 		window.ethereum.autoRefreshOnNetworkChange = false
+	// 		window.ethereum.on('networkChanged', network => {
+	// 			console.log('???????????????')
+	// 			return this.onChangeNetwork()
+	// 		})
+
+	// 		// return callback()
+	// 	}
+	// },
+
+	getNetwork: function (work, callback) {
+		console.log(work)
+
 		this.theWeb3.eth.net.getNetworkType().then(network => {
-			return callback(network)
+			console.log(network)
+
+			if (network === 'rinkeby') {
+				this.theWeb3.eth.net.getId().then(id => {
+					console.log(id)
+
+					if (id === 4) {
+						return callback(network)
+					}
+				})
+			} else if (network === 'private') {
+				// Elastos Test network.
+				this.theWeb3.eth.net.getId().then(id => {
+					return callback('Elastos Test network')
+				})
+			}
 		})
 	},
 
@@ -92,16 +117,18 @@ const God = {
 	 * @param {String} tx 转帐交易tx
 	 * @param {Function} callback 成功后回调
 	 */
-	requestAPI: function (tx, callback) {
+	requestAPI: function (tx, callback, errorCallback) {
 		const s = this.API + '?txid=' + tx + '&chain_type=ETH'
+
 		fetch(s, {
 			method: 'GET'
-		}).then(res => res.json()).then((responseJson) => {
+		}).then(res => res.json()).then(responseJson => {
 			if (responseJson.status === 200) {
 				return callback(responseJson.result)
 			}
-		}).catch((error) => {
+		}).catch(error => {
 			console.error(error);
+			return errorCallback(s)
 		})
 	},
 
@@ -135,6 +162,8 @@ const God = {
 		)
 
 		func.estimateGas({ from: this._theAccount }).then(gas => {
+			console.log('交易成本为：', gas)
+
 			func.send({
 				from: this._theAccount,
 				gas: gas

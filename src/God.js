@@ -1,5 +1,4 @@
 import ESCExchange from './ESCExchange'
-import BigNumber from 'bignumber.js'
 import ETHExchange from "./ETHExchange"
 import axios from 'axios'
 
@@ -82,16 +81,23 @@ const God = {
 	 * @param {Function} callback 成功后回调。
 	 */
 	transfer: function (num, callback) {
+		// this.theWeb3.eth.sendTransaction({
+		// 	from: this._theAccount,
+		// 	to: ETHExchange.address,
+		// 	value: this.theWeb3.utils.toWei(String(num), 'ether')
+		// }, (error, hash) => {
+		// 	if (error) {
+		// 		return console.error(error)
+		// 	} else {
+		// 		return callback(hash)
+		// 	}
+		// })
 		this.theWeb3.eth.sendTransaction({
 			from: this._theAccount,
 			to: ETHExchange.address,
 			value: this.theWeb3.utils.toWei(String(num), 'ether')
-		}, (error, hash) => {
-			if (error) {
-				return console.error(error)
-			} else {
-				return callback(hash)
-			}
+		}).on('receipt', function (receipt) {
+			return callback(receipt.transactionHash)
 		})
 	},
 

@@ -10,6 +10,7 @@ function App() {
   const [message, setMessage] = useState('')
   const [loaded, setLoaded] = useState(false)
   const [useEthereum, setUseEthereum] = useState(true)
+  const [data, setData] = useState(null)
 
 
   /**
@@ -45,6 +46,10 @@ function App() {
         })
 
         setLoaded(true)
+
+        if (network === 'Elastos Test network') {
+          setUseEthereum(false)
+        }
       })
     })
   }
@@ -56,8 +61,10 @@ function App() {
       setMessage('转帐请求（' + tx + '）正在确认，请求签名接口……')
 
       God.requestAPI(tx, result => {
-        // setMessage('正在请求提币合约……')
-        // withdraw(result)
+        if (result) {
+          setData(result)
+          setMessage('请在 Metamask 中切换到 Elastos Test Network！')
+        }
       }, url => {
         setMessage('请求接口失败：' + url + '\n\n请在 Metamask 中切换到 Elastos Test Network！')
         setUseEthereum(false)
@@ -65,7 +72,12 @@ function App() {
     })
   }
 
-  const withdraw = data => {
+  // const withdraw = data => {
+  //   God.withdraw(data, () => {
+  //     setMessage('流程结束，提取请求正在等待节点确认……')
+  //   })
+  // }
+  const withdraw = () => {
     God.withdraw(data, () => {
       setMessage('流程结束，提取请求正在等待节点确认……')
     })

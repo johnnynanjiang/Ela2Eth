@@ -1,12 +1,15 @@
 import ESCExchange from './ESCExchange'
 import BigNumber from 'bignumber.js'
-import ETHExchange from "./ETHExchange";
+import ETHExchange from "./ETHExchange"
+import axios from 'axios'
 
 const God = {
 	theEth: null,
 	theWeb3: null,
 	_theAccount: '',
-	API: 'https://dev.elapp.org/api/v1/oracle/signature',
+	// API: 'https://dev.elapp.org/api/v1/oracle/signature',
+	// API: 'http://localhost:8080/api/v1/oracle/signature',
+	API: 'http://104.224.180.40:8080/api/v1/oracle/signature',
 	_contractInput: null,
 	_contractOutput: null,
 	_contractWETH: null,
@@ -15,26 +18,6 @@ const God = {
 	onChangeNetwork: function (func) {
 		func()
 	},
-
-	// /**
-	//  * 因为是测试模拟流程，所以没有实现基于web3的新建帐户或导入已有帐户私钥等功能，暂时先基于Metamask浏览器插件运行。
-	//  * 初始化时连接Metamask后，使用Metamask封装的web3进行链的操作。
-	//  */
-	// init: function () {
-	// 	if (typeof window.ethereum !== 'undefined') {
-	// 		this.theEth = window.ethereum
-	// 		this.theEth.enable()
-	// 		this.theWeb3 = new Web3(Web3.givenProvider)
-
-	// 		window.ethereum.autoRefreshOnNetworkChange = false
-	// 		window.ethereum.on('networkChanged', network => {
-	// 			console.log('???????????????')
-	// 			return this.onChangeNetwork()
-	// 		})
-
-	// 		// return callback()
-	// 	}
-	// },
 
 	getNetwork: function (work, callback) {
 		console.log(work)
@@ -120,16 +103,32 @@ const God = {
 	requestAPI: function (tx, callback, errorCallback) {
 		const s = this.API + '?txid=' + tx + '&chain_type=ETH'
 
-		fetch(s, {
-			method: 'GET'
-		}).then(res => res.json()).then(responseJson => {
-			if (responseJson.status === 200) {
-				return callback(responseJson.result)
+		// fetch(s, {
+		// 	method: 'GET',
+		// 	mode: 'cors',
+		// }).then(res => res.json()).then(responseJson => {
+		// 	if (responseJson.status === 200) {
+		// 		return callback({
+		// 			...responseJson.result,
+		// 			amount: 3,
+		// 			token_address: ETHExchange.address
+		// 		})
+		// 	}
+		// }).catch(error => {
+		// 	console.error(error);
+		// 	return errorCallback(s)
+		// })
+		axios.get(s).then(response => {
+			if (response.data.status === 200) {
+				return callback({
+					...response.data.result,
+					amount: this.theWeb3.utils.toBN(3),
+					token_address: ETHExchange.address
+				})
 			}
-		}).catch(error => {
-			console.error(error);
-			return errorCallback(s)
-		})
+		}).catch(function (error) {
+			console.log(error);
+		}).then(function () { })
 	},
 
 	/**
@@ -154,7 +153,7 @@ const God = {
 			args.token_address,
 			args.txid,
 			args.to,
-			new BigNumber(args.amount),
+			args.amount,
 			[args.nonce],
 			[args.v],
 			[args.r],

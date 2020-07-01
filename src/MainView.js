@@ -34,7 +34,8 @@ class MainView extends React.Component {
 	}
 
 	onClickSubmit(event) {
-		this.props.withdraw(JSON.parse(this.state.dataString).result)
+		// this.props.withdraw(JSON.parse(this.state.dataString).result)
+		this.props.withdraw()
 	}
 
 	render() {
@@ -74,7 +75,7 @@ class MainView extends React.Component {
 						</span>
 						<button
 							disabled={!(this.state.value > 0)}
-							onClick={this.onClickTransferButton}>转换</button>
+							onClick={this.onClickTransferButton}>向Ethereum合约充值</button>
 					</div>
 				</div>
 			) : null}
@@ -85,10 +86,11 @@ class MainView extends React.Component {
 
 			{!this.props.useEthereum ? (
 				<div>
-					<textarea
+					{/* <textarea
 						onChange={this.onChangeDataString}
 						placeholder="粘贴前述接口返回的Json字符串" />
-					<button onClick={this.onClickSubmit}>提取</button>
+					<button onClick={this.onClickSubmit}>提取</button> */}
+					<button onClick={this.onClickSubmit}>最后一步：提取</button>
 				</div>
 			) : null}
 		</div>

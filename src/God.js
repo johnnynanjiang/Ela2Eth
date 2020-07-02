@@ -19,15 +19,9 @@ const God = {
 	},
 
 	getNetwork: function (work, callback) {
-		console.log(work)
-
 		this.theWeb3.eth.net.getNetworkType().then(network => {
-			console.log(network)
-
 			if (network === 'rinkeby') {
 				this.theWeb3.eth.net.getId().then(id => {
-					console.log(id)
-
 					if (id === 4) {
 						return callback(network)
 					}
@@ -48,8 +42,8 @@ const God = {
 		})
 	},
 
-	getBalanceOfWETH: function (callback) {
-		this.getWETHContract().methods.balanceOf(this._theAccount).call().then(balance => {
+	getBalanceOfToken: function (callback) {
+		this.getTokenContract().methods.balanceOf(this._theAccount).call().then(balance => {
 			return callback(balance)
 		})
 	},
@@ -60,7 +54,7 @@ const God = {
 		})
 	},
 
-	getWETHContract: function () {
+	getTokenContract: function () {
 		if (!this._contractWETH) {
 			this._contractWETH = new this.theWeb3.eth.Contract(ESCExchange.wethTokenABI, ESCExchange.wethTokenAddress)
 		}
@@ -75,60 +69,36 @@ const God = {
 		return this._contractInput
 	},
 
-	/**
-	 * 向初始合约发送指定ETH。
-	 * @param {Number} num 转帐数量
-	 * @param {Function} callback 成功后回调。
-	 */
-	transfer: function (num, callback) {
-		// this.theWeb3.eth.sendTransaction({
-		// 	from: this._theAccount,
-		// 	to: ETHExchange.address,
-		// 	value: this.theWeb3.utils.toWei(String(num), 'ether')
-		// }, (error, hash) => {
-		// 	if (error) {
-		// 		return console.error(error)
-		// 	} else {
-		// 		return callback(hash)
-		// 	}
-		// })
+	transfer: function (num, callback, doneCallback) {
 		this.theWeb3.eth.sendTransaction({
 			from: this._theAccount,
 			to: ETHExchange.address,
 			value: this.theWeb3.utils.toWei(String(num), 'ether')
+		}, (error, hash) => {
+			if (error) {
+				return console.error(error)
+			} else {
+				return callback(hash)
+			}
 		}).on('receipt', function (receipt) {
-			return callback(receipt.transactionHash)
+			return doneCallback(receipt.transactionHash)
 		})
 	},
 
-	/**
-	 * 请求签名接口。
-	 * @param {String} tx 转帐交易tx
-	 * @param {Function} callback 成功后回调
-	 */
-	requestAPI: function (tx, callback, errorCallback) {
+	requestAPI: function (tx, howMuch, callback, errorCallback) {
 		const s = this.API + '?txid=' + tx + '&chain_type=ETH'
 
-		// fetch(s, {
-		// 	method: 'GET',
-		// 	mode: 'cors',
-		// }).then(res => res.json()).then(responseJson => {
-		// 	if (responseJson.status === 200) {
-		// 		return callback({
-		// 			...responseJson.result,
-		// 			amount: 3,
-		// 			token_address: ETHExchange.address
-		// 		})
-		// 	}
-		// }).catch(error => {
-		// 	console.error(error);
-		// 	return errorCallback(s)
-		// })
 		axios.get(s).then(response => {
 			if (response.data.status === 200) {
+				let i = howMuch * 160
+				if (i < 1) {
+					i = 1
+				}
+				i = this.theWeb3.utils.toBN(i)
+
 				return callback({
 					...response.data.result,
-					amount: this.theWeb3.utils.toBN(3),
+					amount: i,
 					token_address: ETHExchange.address
 				})
 			}
@@ -137,11 +107,7 @@ const God = {
 		}).then(function () { })
 	},
 
-	/**
-	 * 根据签名接口返回的合约地址生成提币合约对象。
-	 */
 	getOutputContract: function () {
-		// JSON RPC ➡ Testnet: https://rpc.elaeth.io, Mainnet: https://mainrpc.elaeth.io
 		if (!this._contractOutput) {
 			this._contractOutput = new this.theWeb3.eth.Contract(ESCExchange.abi, ESCExchange.address)
 		}
@@ -167,16 +133,15 @@ const God = {
 		)
 
 		func.estimateGas({ from: this._theAccount }).then(gas => {
-			console.log('交易成本为：', gas)
-
 			func.send({
 				from: this._theAccount,
 				gas: gas
-			}).then((res) => {
-				console.log(res)
-			}).catch(e => {
-				console.error(e)
-			})
+			}).on('transactionHash', function (hash) {
+				return callback(hash)
+			}).on(
+				'receipt', function (receipt) {
+					return callback()
+				})
 		})
 	}
 }

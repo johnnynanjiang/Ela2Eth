@@ -81,7 +81,7 @@ function App() {
                     })
                   }
                 }, url => {
-                  openNotification('签名接口', '请求接口失败：' + url)
+                  openNotification('签名接口', '请求接口失败。请联系接口开发者。')
                 })
               }
             })
@@ -136,7 +136,7 @@ function App() {
 
   return (
     <div style={{ marginLeft: '1rem' }}>
-      <h1>Smart Contract Testing</h1>
+      <h1>ETH to ELA</h1>
 
       <div className="infoBlock">
         请确保您的Metamask插件中已配置了两个Network:
@@ -147,7 +147,7 @@ function App() {
       </div>
 
       <div className="block">
-        <h2>第一步：<img height="32px" src="Ethereum.png" />Rinkeby Test Network</h2>
+        <h2>1/3：<img height="32px" src="Ethereum.png" />Rinkeby Test Network</h2>
 
         <div>
           <div>
@@ -185,14 +185,14 @@ function App() {
 
       {isStep2 ? (
         <div className="block">
-          <h2>第二步：切换到 Elastos Testnet</h2>
+          <h2>2/3：切换到 Elastos Testnet</h2>
           <div>请在Metamask中将Network切换到Elastos Testnet</div>
         </div>
       ) : null}
 
       {!useEthereum ? (
         <div className="block">
-          <h2>第三步：<img height="32px" src="ELA.png" />Elastos Testnet</h2>
+          <h2>3/3：<img height="32px" src="ELA.png" />Elastos Testnet</h2>
 
           <div>
             <div>

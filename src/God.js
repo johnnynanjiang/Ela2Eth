@@ -103,7 +103,8 @@ const God = {
 				})
 			}
 		}).catch(function (error) {
-			console.log(error);
+			console.error(error);
+			return errorCallback(s)
 		}).then(function () { })
 	},
 

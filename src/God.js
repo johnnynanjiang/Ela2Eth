@@ -8,7 +8,7 @@ const God = {
 	_theAccount: '',
 	// API: 'https://dev.elapp.org/api/v1/oracle/signature',
 	// API: 'http://localhost:8080/api/v1/oracle/signature',
-	API: 'http://45.32.134.69:8089/api/v1/oracle/signature',
+	API: 'https://shadowtoken.elaphant.app/api/v1/oracle/signature',
 	_contractInput: null,
 	_contractOutput: null,
 	_contractWETH: null,

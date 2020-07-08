@@ -6,6 +6,7 @@ import './App.css'
 import '../node_modules/antd/dist/antd.css'
 
 let transactionHash = ''
+let isVersion8 = false
 
 function App() {
 
@@ -27,15 +28,19 @@ function App() {
 	 */
   const init = () => {
     if (typeof window.ethereum !== 'undefined') {
-      // window.ethereum.enable()
-      window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (window.ethereum.request) {
+        isVersion8 = true
+        window.ethereum.request({ method: 'eth_requestAccounts' });
+      } else {
+        window.ethereum.enable()
+      }
+
 
       God.theWeb3 = new Web3(Web3.givenProvider)
       God.theEth = window.ethereum
 
       window.ethereum.autoRefreshOnNetworkChange = false
-      // window.ethereum.on('networkChanged', network => {
-      window.ethereum.on('chainChanged', network => {
+      window.ethereum.on(isVersion8 ? 'chainChanged' : 'networkChanged', network => {
         choiceNetwork()
       })
     }

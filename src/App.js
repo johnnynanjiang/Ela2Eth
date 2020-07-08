@@ -27,13 +27,15 @@ function App() {
 	 */
   const init = () => {
     if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.enable()
+      // window.ethereum.enable()
+      window.ethereum.request({ method: 'eth_requestAccounts' });
 
       God.theWeb3 = new Web3(Web3.givenProvider)
       God.theEth = window.ethereum
 
       window.ethereum.autoRefreshOnNetworkChange = false
-      window.ethereum.on('networkChanged', network => {
+      // window.ethereum.on('networkChanged', network => {
+      window.ethereum.on('chainChanged', network => {
         choiceNetwork()
       })
     }
@@ -109,7 +111,7 @@ function App() {
       openNotification('Rinkeby Test Network', '转帐交易（' + tx + '）正在确认。确认后将会自动进入下一步，请稍候……')
       transactionHash = tx
     }, tx => {
-      openNotification('Rinkeby Test Network', '交易已确认。')
+      openNotification('Rinkeby Test Network', '交易正在确认中……。')
       setIsStep2(true)
     })
   }
@@ -186,7 +188,7 @@ function App() {
       {isStep2 ? (
         <div className="block">
           <h2>2/3：切换到 Elastos Testnet</h2>
-          <div>请在Metamask中将Network切换到Elastos Testnet</div>
+          <div>请在Metamask弹出交易已确认的提示后，将Network切换到Elastos Testnet</div>
         </div>
       ) : null}
 

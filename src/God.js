@@ -80,8 +80,10 @@ const God = {
 			} else {
 				return callback(hash)
 			}
-		}).on('receipt', function (receipt) {
-			return doneCallback(receipt.transactionHash)
+		}).on('transactionHash', tx => {
+			// }).on('receipt', receipt => {
+			// return doneCallback(receipt.transactionHash)
+			return doneCallback(tx)
 		})
 	},
 
